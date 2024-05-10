@@ -91,7 +91,7 @@ initialize_project() {
     local project_name="$1"
     local language="$2"
     local git="$3"
-    ./languages/"$language".sh "$project_name" "$git"
+    ./languages/"$language".sh "$project_name" "$git"  
 }
 
 # Function to check if a directory exists
@@ -103,6 +103,47 @@ directory_exists() {
         return 1 # Directory does not exist
     fi
 }
+
+# Function to log messages
+log_message() {
+    local type="$1"
+    local message="$2"
+    local timestamp=$(date +"%Y-%m-%d  %H:%M:%S")
+    local username=$(whoami)
+   sudo echo "$timestamp : $username : $type : $message" | tee -a /var/log/initWizard/history.log
+}
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root" >&2
+    exit 1
+fi
+
+# Check if log directory exists, if not, create it
+log_dir="/var/log/initWizard"
+if ! directory_exists "$log_dir"; then
+   sudo mkdir -p "$log_dir"
+fi
+
+# Check if log file exists, if not, create it
+log_file="$log_dir/history.log"
+if [ ! -f "$log_file" ]; then
+    sudo touch "$log_file"
+fi
+
+# Parse command-line options
+while getopts ":l" opt; do
+    case ${opt} in
+        l )
+            # Enable logging
+            LOG_ENABLED=true
+            ;;
+        \? )
+            echo "Invalid option: $OPTARG" 1>&2
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND -1))
 
 display_banner() {
     echo ""
@@ -147,5 +188,9 @@ choose_from_menu "Select a framework:" language "${languages[@]}"
 
 selections=("Yes" "No")
 choose_from_menu "Do you want to create a git repository?" git "${selections[@]}"
+
+if [ "$LOG_ENABLED" = true ]; then
+    log_message "INFOS" "Logging enabled"
+fi
 
 initialize_project "$project_name" "$language" "$git"
