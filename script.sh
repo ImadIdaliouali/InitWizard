@@ -44,7 +44,7 @@ initialize_project() {
 
 read -p "Enter project name: " project_name
 
-languages=("c" "cpp")
+languages=("c" "cpp" "js")
 choose_from_menu "Enter language/framework: " language "${languages[@]}"
 
 selections=("yes" "no")
