@@ -7,10 +7,9 @@ mkdir $project_name
 
 cd $project_name
 
-clear
 npm create vite@latest .
-clear
+
 # Initialize Git repository if specified
-if [ "$git" = "yes" ]; then
+if [ "$git" = "Yes" ]; then
     git init
 fi

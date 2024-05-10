@@ -50,6 +50,6 @@ clean:
 # Create README.md
 echo "# $project_name" > README.md
 
-if [ "$git" = "yes" ]; then
+if [ "$git" = "Yes" ]; then
     git init
 fi
