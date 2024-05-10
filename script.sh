@@ -9,43 +9,82 @@ Blue='\e[0;34m'         # Blue
 Purple='\e[0;35m'       # Purple
 Cyan='\e[0;36m'         # Cyan
 White='\e[0;37m'        # White
+Grey='\e[0;90m'         # Grey
+
+# Bold
+BBlack='\e[1;30m'       # Black
+BRed='\e[1;31m'         # Red
+BGreen='\e[1;32m'       # Green
+BYellow='\e[1;33m'      # Yellow
+BBlue='\e[1;34m'        # Blue
+BPurple='\e[1;35m'      # Purple
+BCyan='\e[1;36m'        # Cyan
+BWhite='\e[1;37m'       # White
+BGrey='\e[1;90m'        # Grey
 
 choose_from_menu() {
     local prompt="$1" outvar="$2"
     shift
     shift
-    local options=("$@") cur=0 m=${#options[@]} index=0
+    local options=("$@") cur=0 count=${#options[@]} index=0
     local esc=$(echo -en "\e") # cache ESC as test doesn't allow esc codes
     local max_length=0
+
+    # Calculate the maximum length of the options for proper alignment
     for opt in "${options[@]}"; do
         if [ ${#opt} -gt $max_length ]; then
             max_length=${#opt}
         fi
     done
+
+    # Hide cursor
+    echo -en "${esc}[?25l"
+
+    # Trap SIGINT (Ctrl+C) and show cursor before exiting
+    trap 'echo -en "${esc}[?25h"; exit 1' INT
+
     while true; do
-        # Clear screen
-        tput clear
-        # Display the menu prompt and options
-        echo -e "${Blue}? $prompt${White} › - Use arrow-keys. Return to submit."
-        for ((i=0; i<$m; i++)); do
+        # Display the menu prompt
+        echo -en "${Blue}? ${White}${prompt} ${Grey}› - Use arrow-keys. Return to submit.\n"
+
+        # Display the options
+        for ((i=0; i<$count; i++)); do
             if [ "$i" == "$cur" ]; then
                 echo -e "${Green}❯ ${esc}[4m${options[$i]}${esc}[0m"
             else
-                echo -e "  ${options[$i]}"
+                echo -e "  ${White}${options[$i]}"
             fi
         done
+        
         # Read user input
         read -s -n3 key
+
+        # Move cursor up after displaying the options
+        echo -en "\033[$(($count + 1))A"
+
+        # Clear the line where the menu was displayed
+        echo -en "\r\033[K"
+
         if [[ $key == $esc[A ]]; then # up arrow
-            cur=$(( ($cur - 1 + $m) % $m ))
+            cur=$(( ($cur - 1 + $count) % $count ))
         elif [[ $key == $esc[B ]]; then # down arrow
-            cur=$(( ($cur + 1) % $m ))
+            cur=$(( ($cur + 1) % $count ))
         elif [[ $key == "" ]]; then # Enter key
             break
         fi
     done
+
     # Export the selection to the requested output variable
     printf -v $outvar "${options[$cur]}"
+
+    # Show cursor
+    echo -en "${esc}[?25h"
+
+    # Remove the SIGINT trap
+    trap - INT
+
+    # Display the selected option with a ✔
+    echo -e "${Green}✔ ${White}${prompt} ${Grey}› ${Purple}${options[$cur]}"
 }
 
 initialize_project() {
@@ -106,12 +145,31 @@ while getopts ":l" opt; do
 done
 shift $((OPTIND -1))
 
-# Clear screen
-tput clear
-read -p "? Enter project name: " project_name
+display_banner() {
+    echo ""
+    sleep 0.1
+    echo -e "   ${Green}██╗███╗   ██╗██╗████████╗    ${Red}██${Grey}╗    ${Red}██${Grey}╗${Red}██${Grey}╗${Red}███████${Grey}╗ ${Red}█████${Grey}╗ ${Red}██████${Grey}╗ ${Red}██████${Grey}╗"
+    sleep 0.1
+    echo -e "   ${Green}██║████╗  ██║██║╚══██╔══╝    ${Red}██${Grey}║    ${Red}██${Grey}║${Red}██${Grey}║╚══${Red}███${Grey}╔╝${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}╔══${Red}██${Grey}╗"
+    sleep 0.1
+    echo -e "   ${Green}██║██╔██╗ ██║██║   ██║       ${Red}██${Grey}║ ${Red}█${Grey}╗ ${Red}██${Grey}║${Red}██${Grey}║  ${Red}███${Grey}╔╝ ${Red}███████${Grey}║${Red}██████${Grey}╔╝${Red}██${Grey}║  ${Red}██${Grey}║"
+    sleep 0.1
+    echo -e "   ${Green}██║██║╚██╗██║██║   ██║       ${Red}██${Grey}║${Red}███${Grey}╗${Red}██${Grey}║${Red}██${Grey}║ ${Red}███${Grey}╔╝  ${Red}██${Grey}╔══${Red}██${Grey}║${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║"
+    sleep 0.1
+    echo -e "   ${Green}██║██║ ╚████║██║   ██║       ${Grey}╚${Red}███${Grey}╔${Red}███${Grey}╔╝${Red}██${Grey}║${Red}███████${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║${Red}██${Grey}║  ${Red}██${Grey}║${Red}██████${Grey}╔╝"
+    sleep 0.1
+    echo -e "   ${Green}╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝        ${Grey}╚══╝╚══╝ ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝"
+    echo -e "${White}"
+}
+
+display_banner
+
+echo -en "${Blue}? ${White}Project name: "
+read project_name
+
 # Check if the project folder already exists
-m=0
-while [ $m -ne 1 ]; do
+m=true
+while $m ; do
     if [ -d "$project_name" ]; then
         echo -e "${Red}Error:${White} Project folder '$project_name' already exists."
         read -p "Do you want to replace it (r) or make a new one with a different name (n)? " choice
@@ -121,16 +179,15 @@ while [ $m -ne 1 ]; do
             * ) echo "Invalid option. Exiting."; exit 1;;
         esac
     else
-        m=1
+        m=false
     fi
 done
 
-
 languages=("c" "cpp" "node" "vite")
-choose_from_menu "Enter language/framework: " language "${languages[@]}"
+choose_from_menu "Select a framework:" language "${languages[@]}"
 
-selections=("yes" "no")
-choose_from_menu "Do you want to create a git repository? " git "${selections[@]}"
+selections=("Yes" "No")
+choose_from_menu "Do you want to create a git repository?" git "${selections[@]}"
 
 if [ "$LOG_ENABLED" = true ]; then
     log_message "INFOS" "Logging enabled"

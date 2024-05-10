@@ -14,6 +14,6 @@ touch index.js
 echo "# $project_name" > README.md
 
 # Initialize Git repository if specified
-if [ "$git" = "yes" ]; then
+if [ "$git" = "Yes" ]; then
     git init
 fi
