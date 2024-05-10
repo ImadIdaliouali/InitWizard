@@ -50,9 +50,6 @@ clean:
 # Create README.md
 echo "# $project_name" > README.md
 
-# Create docs folder
-mkdir docs
-
 if [ "$git" = "yes" ]; then
     git init
 fi
