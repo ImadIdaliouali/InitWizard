@@ -7,8 +7,9 @@ mkdir $project_name
 
 cd $project_name
 
-npm create vite@latest $project_name
-
+clear
+npm create vite@latest .
+clear
 # Initialize Git repository if specified
 if [ "$git" = "yes" ]; then
     git init
