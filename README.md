@@ -1,6 +1,6 @@
 # InitWizard
 
-![image](https://github.com/ImadIdaliouali/InitWizard/assets/145778347/f97f281b-7873-46c4-b105-2870a9080505)
+![screenshot](screenshot.png)
 
 This Bash script allows you to easily initialize a new project with various options such as project name, programming language, and whether to create a Git repository.
 
