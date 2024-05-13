@@ -37,7 +37,7 @@ choose_from_menu() {
         fi
     done
     
-      # Hide cursor
+    # Hide cursor
     echo -en "${esc}[?25l"
 
     # Trap SIGINT (Ctrl+C) and show cursor before exiting
@@ -112,7 +112,16 @@ log_message() {
     local message="$2"
     local timestamp=$(date +"%Y-%m-%d  %H:%M:%S")
     local username=$(whoami)
-   sudo echo "$timestamp : $username : $type : $message" | tee -a /var/log/initWizard/history.log
+    sudo echo "$timestamp : $username : $type : $message" | tee -a /var/log/initWizard/history.log
+}
+
+# Function to execute the program in a subshell
+execute_in_subshell() {
+    local script="$1"
+    # Execute the script in a subshell
+    (
+        source "$script"
+    )
 }
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -133,11 +142,16 @@ if [ ! -f "$log_file" ]; then
 fi
 
 # Parse command-line options
-while getopts ":l" opt; do
+while getopts ":l:s" opt; do
     case ${opt} in
         l )
             # Enable logging
             LOG_ENABLED=true
+            ;;
+        s )
+            # Execute in subshell
+            execute_in_subshell "$0"
+            exit 0
             ;;
         \? )
             echo "Invalid option: $OPTARG" 1>&2
@@ -150,15 +164,15 @@ shift $((OPTIND -1))
 display_banner() {
     echo ""
     sleep 0.1
-    echo -e "   ${Green}██╗███╗   ██╗██╗████████╗    ${Red}██${Grey}╗    ${Red}██${Grey}╗${Red}██${Grey}╗${Red}███████${Grey}╗ ${Red}█████${Grey}╗ ${Red}██████${Grey}╗ ${Red}██████${Grey}╗"
+    echo -e "   ${Green}██╗███╗   ██╗██╗████████╗    ${Red}██${Grey}╗    ${Red}██${Grey}╗${Red}███████${Grey}╗ ${Red}█████${Grey}╗ ${Red}██████${Grey}╗ ${Red}██████${Grey}╗"
     sleep 0.1
     echo -e "   ${Green}██║████╗  ██║██║╚══██╔══╝    ${Red}██${Grey}║    ${Red}██${Grey}║${Red}██${Grey}║╚══${Red}███${Grey}╔╝${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}╔══${Red}██${Grey}╗"
     sleep 0.1
-    echo -e "   ${Green}██║██╔██╗ ██║██║   ██║       ${Red}██${Grey}║ ${Red}█${Grey}╗ ${Red}██${Grey}║${Red}██${Grey}║  ${Red}███${Grey}╔╝ ${Red}███████${Grey}║${Red}██████${Grey}╔╝${Red}██${Grey}║  ${Red}██${Grey}║"
+    echo -e "   ${Green}██║██╔██╗ ██║██║   ██║       ${Red}██${Grey}║ ${Red}█${Grey}╗ ${Red}██${Grey}║${Red}██║  ${Red}███${Grey}╔╝ ${Red}███████${Grey}║${Red}██████${Grey}╔╝${Red}██${Grey}║  ${Red}██${Grey}║"
     sleep 0.1
-    echo -e "   ${Green}██║██║╚██╗██║██║   ██║       ${Red}██${Grey}║${Red}███${Grey}╗${Red}██${Grey}║${Red}██${Grey}║ ${Red}███${Grey}╔╝  ${Red}██${Grey}╔══${Red}██${Grey}║${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║"
+    echo -e "   ${Green}██║██║╚██╗██║██║   ██║       ${Red}██${Grey}║${Red}███${Grey}╗${Red}██${Grey}║${Red}██║ ${Red}███${Grey}╔╝  ${Red}██${Grey}╔══${Red}██${Grey}║${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║"
     sleep 0.1
-    echo -e "   ${Green}██║██║ ╚████║██║   ██║       ${Grey}╚${Red}███${Grey}╔${Red}███${Grey}╔╝${Red}██${Grey}║${Red}███████${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║${Red}██${Grey}║  ${Red}██${Grey}║${Red}██████${Grey}╔╝"
+    echo -e "   ${Green}██║██║ ╚████║██║   ██║       ${Grey}╚${Red}███${Grey}╔${Red}███${Grey}╔╝${Red}██║${Red}███████${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║${Red}██║  ${Red}██${Grey}║${Red}██████${Grey}╔╝"
     sleep 0.1
     echo -e "   ${Green}╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝        ${Grey}╚══╝╚══╝ ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝"
     echo -e "${White}"
