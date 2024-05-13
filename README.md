@@ -1,6 +1,6 @@
 # Project Initialization Script
 
-![image](https://github.com/ImadIdaliouali/InitWizard/assets/145778347/0253cfa5-8a0c-4a76-b3cc-115ea0b2eea0)
+![image](https://github.com/ImadIdaliouali/InitWizard/assets/145778347/f97f281b-7873-46c4-b105-2870a9080505)
 
 This Bash script allows you to easily initialize a new project with various options such as project name, programming language, and whether to create a Git repository.
 
