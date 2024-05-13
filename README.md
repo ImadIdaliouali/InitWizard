@@ -1,4 +1,4 @@
-# Project Initialization Script
+# InitWizard
 
 ![image](https://github.com/ImadIdaliouali/InitWizard/assets/145778347/f97f281b-7873-46c4-b105-2870a9080505)
 
@@ -6,19 +6,20 @@ This Bash script allows you to easily initialize a new project with various opti
 
 ## Usage
 
-1. Make sure the script file (`init_project.sh`) is executable. If not, you can make it executable using the following command:
-    ```bash
-    chmod +x init_project.sh
-    ```
+1. Make sure the script file (`initWizard.sh`) is executable. If not, you can make it executable using the following command:
+   ```bash
+   chmod +x initWizard.sh
+   ```
 2. Run the script by executing the following command:
-    ```bash
-    ./init_project.sh
-    ```
+   ```bash
+   sudo ./initWizard.sh
+   ```
 3. Follow the prompts to provide the necessary information:
-    - **Project Name:** Enter the desired name for your project.
-    - **Replace Existing Project:** If a project folder with the same name already exists, choose whether to replace it or create a new one with a different name.
-    - **Select a Language:** Choose the programming language for your project from the available options.
-    - **Create Git Repository:** Decide whether to create a Git repository for your project.
+
+   - **Project Name:** Enter the desired name for your project.
+   - **Replace Existing Project:** If a project folder with the same name already exists, choose whether to replace it or create a new one with a different name.
+   - **Select a Language:** Choose the programming language for your project from the available options.
+   - **Create Git Repository:** Decide whether to create a Git repository for your project.
 
 4. After providing all the required information, the script will initialize your project accordingly.
 
@@ -26,13 +27,13 @@ This Bash script allows you to easily initialize a new project with various opti
 
 - **-l**: Enable logging. This option enables logging of information during project initialization.
 
-- **-h (help)**: Affiche une documentation détaillée du programme.
+- **-h (help)**: Display detailed program documentation.
 
-- **-f (fork)**: Permet une exécution par création de sous-processus avec fork. (working on it)
+- **-f (fork)**: Enable execution by creating subprocesses with fork. (working on it)
 
-- **-t (thread)**: Permet une exécution par threads. (working on it)
+- **-t (thread)**: Enable execution by threads. (working on it)
 
-- **-s (subshell)**: Exécute le programme dans un sous-shell.
+- **-s (subshell)**: Execute the program in a subshell.
 
 ## Notes
 
