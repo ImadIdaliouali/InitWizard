@@ -46,10 +46,3 @@ all: \$(EXECUTABLE)
 
 clean:
 \trm -rf \$(OBJ_DIR)/* \$(BIN_DIR)/*" > Makefile
-
-# Create README.md
-echo "# $project_name" > README.md
-
-if [ "$git" = "Yes" ]; then
-    git init
-fi

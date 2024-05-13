@@ -37,7 +37,7 @@ choose_from_menu() {
         fi
     done
     
-    # Hide cursor
+      # Hide cursor
     echo -en "${esc}[?25l"
 
     # Trap SIGINT (Ctrl+C) and show cursor before exiting
@@ -91,9 +91,13 @@ choose_from_menu() {
 
 initialize_project() {
     local project_name="$1"
-    local language="$2"
+    local language="${2,,}"
     local git="$3"
-    ./languages/"$language".sh "$project_name" "$git"  
+    ./languages/"$language".sh "$project_name" "$git" 
+    create_readme "$project_name"
+    if [ "$git" = "Yes" ]; then
+        initialize_git_repo "$project_name"
+    fi
 }
 
 # Function to check if a directory exists
@@ -112,7 +116,7 @@ log_message() {
     local message="$2"
     local timestamp=$(date +"%Y-%m-%d  %H:%M:%S")
     local username=$(whoami)
-    sudo echo "$timestamp : $username : $type : $message" | tee -a /var/log/initWizard/history.log
+   sudo echo "$timestamp : $username : $type : $message" | tee -a /var/log/initWizard/history.log
 }
 
 # Function to execute the program in a subshell
@@ -124,13 +128,41 @@ execute_in_subshell() {
     )
 }
 
+# Function to display help message
+display_help() {
+    echo -e "${BWhite}Usage:${White} $0 [options] [paramètre]\n"
+    echo -e "${BWhite}Options:${White}"
+    echo -e "  ${BBlue}-h${White}, ${BBlue}--help${White}          Display this help message"
+    echo -e "  ${BBlue}-f${White}, ${BBlue}--fork${White}          Enable fork execution"
+    echo -e "  ${BBlue}-t${White}, ${BBlue}--thread${White}        Enable thread execution"
+    echo -e "  ${BBlue}-s${White}, ${BBlue}--subshell${White}     Execute program in a subshell"
+    echo -e "  ${BBlue}-l${White}, ${BBlue}--log${White}           Specify a directory for log file storage"
+    echo -e "  ${BBlue}-r${White}, ${BBlue}--restore${White}       Reset to default settings (admin only)"
+    echo -e "\n${BWhite}Example:${White} $0 --log"
+}
+
+# Function to initialize a git repository
+initialize_git_repo() {
+    local project_name="$1"
+    cd "$project_name" || exit
+    git init
+    git add .
+    git commit -m "Initial commit"
+}
+
+# Function to create README.md
+create_readme() {
+    local project_name="$1"
+    echo "# $project_name" > "$project_name/README.md"
+}
+
 if [ "$(id -u)" -ne 0 ]; then
     echo "This script must be run as root" >&2
     exit 1
 fi
 
 # Check if log directory exists, if not, create it
-log_dir="/var/log/initWizard"
+log_dir="/var/log/InitWizard"
 if ! directory_exists "$log_dir"; then
    sudo mkdir -p "$log_dir"
 fi
@@ -142,37 +174,44 @@ if [ ! -f "$log_file" ]; then
 fi
 
 # Parse command-line options
-while getopts ":l:s" opt; do
-    case ${opt} in
-        l )
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+        -h|--help)
+            display_help
+            exit 0
+            ;;
+        -l|--log)
             # Enable logging
             LOG_ENABLED=true
+            shift
             ;;
-        s )
-            # Execute in subshell
+        -s|--subshell)
+            # Execute the program in a subshell
             execute_in_subshell "$0"
             exit 0
             ;;
-        \? )
-            echo "Invalid option: $OPTARG" 1>&2
+        *)
+            echo "Invalid option: $1" >&2
+            display_help
             exit 1
             ;;
     esac
 done
-shift $((OPTIND -1))
 
+# Function to display the banner
 display_banner() {
     echo ""
     sleep 0.1
-    echo -e "   ${Green}██╗███╗   ██╗██╗████████╗    ${Red}██${Grey}╗    ${Red}██${Grey}╗${Red}███████${Grey}╗ ${Red}█████${Grey}╗ ${Red}██████${Grey}╗ ${Red}██████${Grey}╗"
+    echo -e "   ${Green}██╗███╗   ██╗██╗████████╗    ${Red}██${Grey}╗    ${Red}██${Grey}╗${Red}██${Grey}╗${Red}███████${Grey}╗ ${Red}█████${Grey}╗ ${Red}██████${Grey}╗ ${Red}██████${Grey}╗"
     sleep 0.1
     echo -e "   ${Green}██║████╗  ██║██║╚══██╔══╝    ${Red}██${Grey}║    ${Red}██${Grey}║${Red}██${Grey}║╚══${Red}███${Grey}╔╝${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}╔══${Red}██${Grey}╗"
     sleep 0.1
-    echo -e "   ${Green}██║██╔██╗ ██║██║   ██║       ${Red}██${Grey}║ ${Red}█${Grey}╗ ${Red}██${Grey}║${Red}██║  ${Red}███${Grey}╔╝ ${Red}███████${Grey}║${Red}██████${Grey}╔╝${Red}██${Grey}║  ${Red}██${Grey}║"
+    echo -e "   ${Green}██║██╔██╗ ██║██║   ██║       ${Red}██${Grey}║ ${Red}█${Grey}╗ ${Red}██${Grey}║${Red}██${Grey}║  ${Red}███${Grey}╔╝ ${Red}███████${Grey}║${Red}██████${Grey}╔╝${Red}██${Grey}║  ${Red}██${Grey}║"
     sleep 0.1
-    echo -e "   ${Green}██║██║╚██╗██║██║   ██║       ${Red}██${Grey}║${Red}███${Grey}╗${Red}██${Grey}║${Red}██║ ${Red}███${Grey}╔╝  ${Red}██${Grey}╔══${Red}██${Grey}║${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║"
+    echo -e "   ${Green}██║██║╚██╗██║██║   ██║       ${Red}██${Grey}║${Red}███${Grey}╗${Red}██${Grey}║${Red}██${Grey}║ ${Red}███${Grey}╔╝  ${Red}██${Grey}╔══${Red}██${Grey}║${Red}██${Grey}╔══${Red}██${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║"
     sleep 0.1
-    echo -e "   ${Green}██║██║ ╚████║██║   ██║       ${Grey}╚${Red}███${Grey}╔${Red}███${Grey}╔╝${Red}██║${Red}███████${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║${Red}██║  ${Red}██${Grey}║${Red}██████${Grey}╔╝"
+    echo -e "   ${Green}██║██║ ╚████║██║   ██║       ${Grey}╚${Red}███${Grey}╔${Red}███${Grey}╔╝${Red}██${Grey}║${Red}███████${Grey}╗${Red}██${Grey}║  ${Red}██${Grey}║${Red}██${Grey}║  ${Red}██${Grey}║${Red}██████${Grey}╔╝"
     sleep 0.1
     echo -e "   ${Green}╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝        ${Grey}╚══╝╚══╝ ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝"
     echo -e "${White}"
@@ -199,7 +238,7 @@ while $m ; do
     fi
 done
 
-languages=("c" "cpp" "node" "vite")
+languages=("C" "Cpp" "Node" "Vite")
 choose_from_menu "Select a language:" language "${languages[@]}"
 
 selections=("Yes" "No")
