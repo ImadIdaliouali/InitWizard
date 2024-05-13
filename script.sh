@@ -36,8 +36,8 @@ choose_from_menu() {
             max_length=${#opt}
         fi
     done
-
-    # Hide cursor
+    
+      # Hide cursor
     echo -en "${esc}[?25l"
 
     # Trap SIGINT (Ctrl+C) and show cursor before exiting
@@ -84,7 +84,9 @@ choose_from_menu() {
     trap - INT
 
     # Display the selected option with a ✔
-    echo -e "${Green}✔ ${White}${prompt} ${Grey}› ${Purple}${options[$cur]}"
+    echo -e "${Green}✔ ${White}${outvar} ${Grey}› ${Purple}${options[$cur]}"
+    # Clear the rest of the screen
+    tput ed
 }
 
 initialize_project() {
@@ -184,7 +186,7 @@ while $m ; do
 done
 
 languages=("c" "cpp" "node" "vite")
-choose_from_menu "Select a framework:" language "${languages[@]}"
+choose_from_menu "Select a language:" language "${languages[@]}"
 
 selections=("Yes" "No")
 choose_from_menu "Do you want to create a git repository?" git "${selections[@]}"
